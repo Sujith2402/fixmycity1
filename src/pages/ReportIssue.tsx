@@ -43,7 +43,32 @@ export default function ReportIssue() {
             attribution: '© OSM'
           }).addTo(map);
 
-          const marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+          const customPin = L.divIcon({
+            className: 'custom-pin',
+            html: `
+              <div style="
+                width: 28px;
+                height: 28px;
+                background: #0f172a;
+                border: 3px solid white;
+                border-radius: 50%;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              ">
+                <div style="width: 8px; height: 8px; border-radius: 50%; background: white;"></div>
+              </div>
+            `,
+            iconSize: [28, 28],
+            iconAnchor: [14, 14]
+          });
+
+          const marker = L.marker([lat, lng], {
+            icon: customPin,
+            draggable: true
+          }).addTo(map);
+
           marker.on('dragend', (e) => {
             const { lat, lng } = e.target.getLatLng();
             setLat(lat);
@@ -204,10 +229,10 @@ export default function ReportIssue() {
               <button
                 key={cat.label}
                 onClick={() => handleCategorySelect(cat.label)}
-                className={`flex flex-col items-center p-3 rounded-xl border transition-all text-center ${category === cat.label
+                className={`flex flex - col items - center p - 3 rounded - xl border transition - all text - center ${category === cat.label
                   ? 'border-primary bg-primary/5 shadow-card'
                   : 'border-border bg-card hover:bg-muted'
-                  }`}
+                  } `}
               >
                 <span className="text-lg mb-1">
                   {cat.label === 'Roads & Infrastructure' ? '🚧' :
