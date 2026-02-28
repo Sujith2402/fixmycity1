@@ -1,0 +1,194 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 20% 97%;
+    --foreground: 220 30% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 30% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 30% 10%;
+
+    --primary: 221 83% 53%;
+    /* Royal Blue */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 222 47% 11%;
+    /* Deep Blue / Slate-900 */
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 215 28% 17%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 173 80% 40%;
+    /* Teal */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 217 32% 17%;
+    --input: 217 32% 17%;
+    --ring: 221 83% 53%;
+
+    --radius: 0.75rem;
+
+    /* Status colors - Government Standard */
+    --status-reported: 38 92% 50%;
+    /* Amber */
+    --status-verified: 217 91% 60%;
+    /* Blue */
+    --status-in-progress: 25 95% 53%;
+    /* Orange */
+    --status-resolved: 142 71% 45%;
+    /* Green */
+    --status-rejected: 0 84% 60%;
+    /* Red */
+
+    /* Category colors */
+    --category-roads: 25 90% 50%;
+    --category-garbage: 145 60% 40%;
+    --category-water: 200 80% 50%;
+    --category-electricity: 45 95% 50%;
+    --category-lights: 280 60% 55%;
+    --category-safety: 0 75% 50%;
+    --category-traffic: 340 70% 50%;
+    --category-others: 220 15% 55%;
+
+    /* Priority */
+    --priority-high: 0 80% 55%;
+    --priority-medium: 36 95% 55%;
+    --priority-low: 145 65% 42%;
+
+    /* Shadows */
+    --shadow-card: 0 1px 3px 0 hsl(220 30% 10% / 0.06), 0 1px 2px -1px hsl(220 30% 10% / 0.06);
+    --shadow-elevated: 0 4px 12px -2px hsl(220 30% 10% / 0.08), 0 2px 6px -2px hsl(220 30% 10% / 0.04);
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 220 25% 8%;
+    --foreground: 220 15% 92%;
+
+    --card: 220 25% 12%;
+    --card-foreground: 220 15% 92%;
+
+    --popover: 220 25% 12%;
+    --popover-foreground: 220 15% 92%;
+
+    --primary: 220 70% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 20% 18%;
+    --secondary-foreground: 220 15% 85%;
+
+    --muted: 220 20% 16%;
+    --muted-foreground: 220 10% 55%;
+
+    --accent: 36 90% 50%;
+    --accent-foreground: 36 95% 95%;
+
+    --destructive: 0 70% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 20% 18%;
+    --input: 220 20% 18%;
+    --ring: 220 70% 55%;
+
+    --shadow-card: 0 1px 3px 0 hsl(0 0% 0% / 0.2);
+    --shadow-elevated: 0 4px 12px -2px hsl(0 0% 0% / 0.3);
+
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  }
+}
+
+/* Leaflet overrides */
+.leaflet-container {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
+  z-index: 0;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 999px;
+}
+
+/* Status badge styles */
+.status-reported {
+  background-color: hsl(var(--status-reported) / 0.12);
+  color: hsl(var(--status-reported));
+}
+
+.status-verified {
+  background-color: hsl(var(--status-verified) / 0.12);
+  color: hsl(var(--status-verified));
+}
+
+.status-in-progress {
+  background-color: hsl(var(--status-in-progress) / 0.12);
+  color: hsl(var(--status-in-progress));
+}
+
+.status-resolved {
+  background-color: hsl(var(--status-resolved) / 0.12);
+  color: hsl(var(--status-resolved));
+}
+
+.status-rejected {
+  background-color: hsl(var(--status-rejected) / 0.12);
+  color: hsl(var(--status-rejected));
+}
+
+/* Priority dot */
+.priority-high {
+  background-color: hsl(var(--priority-high));
+}
+
+.priority-medium {
+  background-color: hsl(var(--priority-medium));
+}
+
+.priority-low {
+  background-color: hsl(var(--priority-low));
+}
