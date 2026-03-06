@@ -72,6 +72,9 @@ export interface Issue {
   assignedDepartment?: string;
   assignedOfficerId?: string;
   slaDeadline?: string;
+  rating?: number;
+  ratingComment?: string;
+  ratingPhotoUrl?: string;
 }
 
 export interface Notification {

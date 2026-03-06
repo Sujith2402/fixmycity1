@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { StatusBadge, PriorityDot } from '@/components/StatusBadge';
 import { STATUS_LABELS, GOVERNMENT_PORTALS, Issue, IssueStatus } from '@/types';
-import { ChevronLeft, MapPin, Clock, ThumbsUp, User, MessageSquare, PlusCircle, Loader2, Send, CheckCircle2, ShieldCheck, Calendar } from 'lucide-react';
+import { ChevronLeft, MapPin, Clock, ThumbsUp, User, MessageSquare, PlusCircle, Loader2, Send, CheckCircle2, ShieldCheck, Calendar, Star } from 'lucide-react';
 import { formatDistanceToNow, format, parseISO } from 'date-fns';
 import { mockOfficers } from '@/data/mockData';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -11,6 +11,7 @@ import { issueService } from '@/services/issueService';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
+import { RatingModal } from '@/components/RatingModal';
 
 const statusSteps = ['reported', 'verified', 'in-progress', 'resolved'] as const;
 
@@ -21,6 +22,7 @@ export default function IssueDetail() {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [noteContent, setNoteContent] = useState('');
+  const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -82,7 +84,20 @@ export default function IssueDetail() {
     }
   };
 
+  const handleRatingSubmit = async (rating: number, comment: string, imageFile: File | null) => {
+    if (!id) return;
+    try {
+      await issueService.submitIssueRating(id, rating, comment, imageFile);
+      toast.success('Rating submitted successfully!');
+    } catch (error) {
+      console.error('Error submitting rating:', error);
+      toast.error('Failed to submit rating. Please try again.');
+      throw error; // Let the modal handle the loading state
+    }
+  };
+
   const currentStepIndex = ['reported', 'acknowledged', 'verified', 'in-progress', 'resolved'].indexOf(issue.status as any);
+  const isReporter = user?.id === issue.reportedBy || (!user?.id && issue.reportedBy); // In case user system uses different IDs temporarily
 
   return (
     <div className="animate-fade-in space-y-8 pb-12">
@@ -147,6 +162,73 @@ export default function IssueDetail() {
               </div>
             </div>
           </div>
+
+          {/* Citizen Feedback Section */}
+          {(issue.rating !== undefined || (issue.status === 'resolved' && isReporter)) && (
+            <div className="bg-card rounded-[2.5rem] border border-border p-8 shadow-sm">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-1.5 h-6 bg-amber-400 rounded-full" />
+                  <h3 className="text-lg font-bold text-foreground tracking-tight">Citizen Feedback</h3>
+                </div>
+
+                {issue.status === 'resolved' && issue.rating === undefined && isReporter && (
+                  <Button
+                    onClick={() => setIsRatingModalOpen(true)}
+                    className="bg-amber-400 hover:bg-amber-500 text-black font-bold rounded-full"
+                  >
+                    <Star className="w-4 h-4 mr-2 fill-current" />
+                    Rate Resolution
+                  </Button>
+                )}
+              </div>
+
+              {issue.rating !== undefined ? (
+                <div className="space-y-6">
+                  <div className="flex items-center gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={`w-6 h-6 ${star <= issue.rating!
+                            ? 'fill-amber-400 text-amber-400'
+                            : 'text-muted/30'
+                          }`}
+                      />
+                    ))}
+                    <span className="ml-2 text-sm font-bold text-muted-foreground">
+                      {issue.rating}/5 Stars
+                    </span>
+                  </div>
+
+                  {issue.ratingComment && (
+                    <div className="bg-secondary/30 p-4 rounded-2xl border border-transparent">
+                      <p className="text-sm font-medium text-foreground leading-relaxed italic">
+                        "{issue.ratingComment}"
+                      </p>
+                    </div>
+                  )}
+
+                  {issue.ratingPhotoUrl && (
+                    <div className="relative aspect-video rounded-2xl overflow-hidden border border-border shadow-sm">
+                      <img
+                        src={issue.ratingPhotoUrl}
+                        alt="Resolution feedback"
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute bottom-3 left-3 bg-black/50 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-2">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-green-400" />
+                        <span className="text-[10px] font-bold text-white uppercase tracking-wider">Citizen Verified</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-6 bg-secondary/20 rounded-2xl border border-dashed border-border">
+                  <p className="text-sm text-muted-foreground font-medium">Awaiting evaluation from the citizen.</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="space-y-8">
@@ -328,6 +410,12 @@ export default function IssueDetail() {
           </div>
         </div>
       </div>
+
+      <RatingModal
+        isOpen={isRatingModalOpen}
+        onClose={() => setIsRatingModalOpen(false)}
+        onSubmit={handleRatingSubmit}
+      />
     </div>
   );
 }

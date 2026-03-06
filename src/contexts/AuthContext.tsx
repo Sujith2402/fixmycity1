@@ -7,7 +7,7 @@ import {
     onAuthStateChanged,
     User as FirebaseUser
 } from 'firebase/auth';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
 import { auth, googleProvider, db } from '@/lib/firebase';
 
 interface User {
@@ -34,35 +34,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+        let unsubscribeSnapshot: () => void;
+
+        const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
             if (firebaseUser) {
-                // Fetch additional user data (role) from Firestore
-                const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-                if (userDoc.exists()) {
-                    const userData = userDoc.data();
-                    setUser({
-                        id: firebaseUser.uid,
-                        email: firebaseUser.email || '',
-                        name: userData.name || firebaseUser.displayName || 'User',
-                        role: userData.role || 'citizen',
-                        avatar: firebaseUser.photoURL || undefined
-                    });
-                } else {
-                    // Fallback for cases where document doesn't exist yet
-                    setUser({
-                        id: firebaseUser.uid,
-                        email: firebaseUser.email || '',
-                        name: firebaseUser.displayName || 'User',
-                        role: 'citizen'
-                    });
-                }
+                // Listen to real-time updates for the user document
+                unsubscribeSnapshot = onSnapshot(doc(db, 'users', firebaseUser.uid), (userDoc) => {
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        setUser({
+                            id: firebaseUser.uid,
+                            email: firebaseUser.email || '',
+                            name: userData.name || firebaseUser.displayName || 'User',
+                            role: userData.role || 'citizen',
+                            avatar: firebaseUser.photoURL || undefined
+                        });
+                        setLoading(false);
+                    } else {
+                        // Document doesn't exist yet (e.g., during registration).
+                        // Do NOT overwrite user state with a fallback 'citizen' role, 
+                        // as this will cause premature Auth redirects before registration finishes.
+                        setLoading(false);
+                    }
+                });
             } else {
                 setUser(null);
+                setLoading(false);
+                if (unsubscribeSnapshot) {
+                    unsubscribeSnapshot();
+                }
             }
-            setLoading(false);
         });
 
-        return () => unsubscribe();
+        return () => {
+            unsubscribeAuth();
+            if (unsubscribeSnapshot) {
+                unsubscribeSnapshot();
+            }
+        };
     }, []);
 
     const login = async (email: string, pass: string, _role: 'citizen' | 'admin') => {

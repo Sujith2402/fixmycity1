@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Home, PlusCircle, List, Map, Shield, LogOut, User as UserIcon, LayoutDashboard, Bell } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -20,6 +21,11 @@ export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const [avatarError, setAvatarError] = useState(false);
+
+  useEffect(() => {
+    setAvatarError(false);
+  }, [user?.avatar]);
 
   const handleLogout = async () => {
     await logout();
@@ -97,8 +103,8 @@ export default function Layout({ children }: LayoutProps) {
             <div className="flex items-center gap-3.5 mb-4">
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all ${isAdmin ? 'bg-slate-800 border-white/10' : 'bg-white border-slate-200 shadow-sm'
                 }`}>
-                {user?.avatar ? (
-                  <img src={user.avatar} alt={user.name} className="w-full h-full object-cover rounded-xl" />
+                {user?.avatar && !avatarError ? (
+                  <img src={user.avatar} alt={user.name} className="w-full h-full object-cover rounded-xl" onError={() => setAvatarError(true)} />
                 ) : (
                   <UserIcon className={`w-5 h-5 ${isAdmin ? 'text-teal-400' : 'text-primary'}`} />
                 )}

@@ -163,5 +163,33 @@ export const issueService = {
             notes: arrayUnion(fullNote),
             updatedAt: serverTimestamp()
         });
+    },
+
+    /**
+     * Submit a rating for a resolved issue (Citizen action)
+     */
+    async submitIssueRating(
+        issueId: string,
+        rating: number,
+        comment?: string,
+        imageFile?: File | null
+    ) {
+        const issueRef = doc(db, ISSUES_COLLECTION, issueId);
+
+        let ratingPhotoUrl = '';
+        if (imageFile) {
+            const storageRef = ref(storage, `ratings/${issueId}_${Date.now()}_${imageFile.name}`);
+            const uploadResult = await uploadBytes(storageRef, imageFile);
+            ratingPhotoUrl = await getDownloadURL(uploadResult.ref);
+        }
+
+        const updateData: Partial<Issue> = {
+            rating,
+            ...(comment && { ratingComment: comment }),
+            ...(ratingPhotoUrl && { ratingPhotoUrl }),
+            updatedAt: serverTimestamp() as any
+        };
+
+        await updateDoc(issueRef, updateData);
     }
 };

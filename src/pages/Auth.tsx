@@ -18,7 +18,7 @@ export default function Auth() {
     const [name, setName] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    if (user) return <Navigate to="/" replace />;
+    if (user && !isLoading) return <Navigate to={user.role === 'admin' ? '/admin' : '/'} replace />;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -36,9 +36,10 @@ export default function Auth() {
                 await signup(email, password, name, role);
                 toast.success('Registration successful. Welcome to FixMyCity.');
             }
-            navigate('/');
-        } catch (error) {
-            toast.error('Authentication error. Please verify your credentials.');
+            navigate(role === 'admin' ? '/admin' : '/');
+        } catch (error: any) {
+            console.error(error);
+            toast.error(error.message || 'Authentication error. Please verify your credentials.');
         } finally {
             setIsLoading(false);
         }
@@ -49,9 +50,10 @@ export default function Auth() {
         try {
             await loginWithGoogle(role);
             toast.success(`Government ID verified via Google (${role === 'admin' ? 'Admin' : 'Citizen'})`);
-            navigate('/');
-        } catch (error) {
-            toast.error('Identity verification failed.');
+            navigate(role === 'admin' ? '/admin' : '/');
+        } catch (error: any) {
+            console.error(error);
+            toast.error(error.message || 'Identity verification failed.');
         } finally {
             setIsLoading(false);
         }
